@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Multi-Agent RAG Demo</title>
+  <style>
+    body { font-family: Arial; padding: 40px; background: #f8f9fa; }
+    input[type="text"] { width: 60%; padding: 10px; font-size: 16px; }
+    button { padding: 10px 20px; font-size: 16px; }
+    .result { margin-top: 30px; }
+    pre { background: #eee; padding: 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h2>Ask a Natural Language Question</h2>
+  <form id="askForm">
+    <input type="text" id="question" placeholder="e.g. Who spent the most last year?" required>
+    <button type="submit">Ask</button>
+  </form>
+
+  <div class="result" id="output" style="display:none;">
+    <h3>Answer:</h3>
+    <p id="answer"></p>
+
+    <h4>Intermediate Steps:</h4>
+    <b>Schema:</b>
+    <pre id="schema"></pre>
+    <b>SQL Query:</b>
+    <pre id="sql"></pre>
+    <b>Query Result:</b>
+    <pre id="result"></pre>
+  </div>
+
+  <script>
+    document.getElementById('askForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const question = document.getElementById('question').value;
+
+      const res = await fetch('/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question })
+      });
+
+      const data = await res.json();
+      document.getElementById('output').style.display = 'block';
+      document.getElementById('answer').innerText = data.answer;
+      document.getElementById('schema').innerText = JSON.stringify(data.intermediate_steps.schema, null, 2);
+      document.getElementById('sql').innerText = data.intermediate_steps.sql_query;
+      document.getElementById('result').innerText = JSON.stringify(data.intermediate_steps.result, null, 2);
+    });
+  </script>
+</body>
+</html>
